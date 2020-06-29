@@ -1445,3 +1445,31 @@ func BenchmarkMainLoop(b *testing.B) {
 		vm.RunProgram(prg)
 	}
 }
+
+func TestTryBeingWeird(t *testing.T) {
+	const SCRIPT = `
+		var mod = {};
+		var f = function(){}
+		(function(module) {
+			module.prop1 =function() {
+				try {
+					throw new Error("something");
+				} catch (error) {
+					// var e = error; // uncomment this to fix it
+				}
+
+				return function() {
+					if (false) {
+						f()
+					}
+					return true
+				};
+			}()
+		}(mod))
+
+
+		typeof mod.prop1 == "function";
+	`
+
+	testScript1(SCRIPT, valueTrue, t)
+}
