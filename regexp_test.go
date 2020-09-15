@@ -407,3 +407,58 @@ func BenchmarkRegexpMatch(b *testing.B) {
 		vm.RunProgram(prg)
 	}
 }
+
+func BenchmarkRegexpExec(b *testing.B) {
+	const SCRIPT = `
+        var s = "a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+         a\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\ra\nb\r\c\nd\r\e\n\f\rg\nh\r\
+        "
+		var r = /[^\r\n]+/g
+		while(r.exec(s) != null) {}
+        `
+	b.StopTimer()
+	prg, err := Compile("test.js", SCRIPT, false)
+	if err != nil {
+		b.Fatal(err)
+	}
+	vm := New()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		vm.RunProgram(prg)
+	}
+}
