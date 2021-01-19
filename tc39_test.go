@@ -330,6 +330,11 @@ var (
 		"sec-object.values",
 		"sec-proxy-object-internal-methods-and-internal-slots-ownpropertykeys",
 	}
+
+	featuresAllowList = []string{
+		"Symbol.matchAll",
+		"String.prototype.matchAll",
+	}
 )
 
 type tc39Test struct {
@@ -540,6 +545,15 @@ func (ctx *tc39TestCtx) runTC39File(name string, t testing.TB) {
 						skip = false
 						break
 					}
+				}
+			}
+		}
+
+		for _, feature := range meta.Features {
+			for _, bl := range featuresAllowList {
+				if feature == bl {
+					skip = false
+					break
 				}
 			}
 		}
